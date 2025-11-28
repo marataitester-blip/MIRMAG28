@@ -1,110 +1,89 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { ALL_CARDS } from '../constants';
-import { TarotCard } from '../types';
+import { TarotCard, AnalysisResult } from '../types';
 
-// NOTE: We initialize the client inside functions to ensure process.env.API_KEY is available
-// after the user selects it via window.aistudio.openSelectKey()
-
-const MODEL_FAST = 'gemini-2.5-flash';
-
-const getAiClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 /**
- * 1. Analyze input and select the best card
+ * Single-step analysis using Groq for text/logic and Pollinations for images.
  */
-export const findBestMatchingCard = async (userInput: string): Promise<TarotCard> => {
-  const ai = getAiClient();
-  const cardList = ALL_CARDS.map(c => `"${c.name}" (${c.keyword})`).join(", ");
+export const analyzeSituation = async (userInput: string): Promise<AnalysisResult> => {
+  // Use API_KEY from environment (Standard Vercel/System env var)
+  const apiKey = process.env.API_KEY;
   
-  const prompt = `
-    You are a mystical Tarot master using the "Astral Hero" deck.
-    
-    The user has described this state/situation: 
-    "${userInput}"
-
-    From the following list of cards, select the ONE that best represents the archetypal energy of this situation.
-    
-    List: ${cardList}
-
-    Return ONLY JSON with the exact name of the card.
-  `;
-
-  const response = await ai.models.generateContent({
-    model: MODEL_FAST,
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          cardName: { type: Type.STRING }
-        }
-      }
-    }
-  });
-
-  const text = response.text || "{}";
-  try {
-    const json = JSON.parse(text);
-    const selectedName = json.cardName;
-    const found = ALL_CARDS.find(c => c.name.toLowerCase() === selectedName.toLowerCase());
-    // Fallback to random if AI hallucinates a name (rare but possible)
-    return found || ALL_CARDS[Math.floor(Math.random() * ALL_CARDS.length)];
-  } catch (e) {
-    console.error("Error parsing card selection", e);
-    return ALL_CARDS[0];
+  if (!apiKey) {
+    console.error("API_KEY is missing");
+    throw new Error("System configuration error: API Key missing");
   }
-};
 
-/**
- * 2. Generate Psychological Interpretation
- */
-export const generateInterpretation = async (userInput: string, card: TarotCard): Promise<string> => {
-  const ai = getAiClient();
-  const prompt = `
-    You are a compassionate psychological counselor and Tarot expert.
+  const systemPrompt = `Ты — глубинный психолог и эксперт по Таро (юнгианский анализ). Твоя цель — дать инсайт. Верни ответ СТРОГО в формате JSON: { "card_id": 0-79, "card_name": "Название (RU)", "interpretation": "Текст (RU)", "image_prompt": "Описание сюрреалистичной картины (EN)" }`;
+
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userInput }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Groq API returned error: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "{}";
+
+    // Clean up potential markdown formatting from LLM response
+    const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    Context:
-    User Input: "${userInput}"
-    Selected Card: "${card.name}" (Archetype: ${card.keyword})
+    let resultJson;
+    try {
+      resultJson = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error("Failed to parse JSON from Groq:", content);
+      throw new Error("Invalid response format from AI");
+    }
 
-    Task:
-    Provide a psychological "Portrait" of the user's situation based on this card.
-    1. Acknowledge their state (Mirroring).
-    2. Explain why this Archetype appeared (The psychological link).
-    3. Give actionable advice or a question for reflection based on the card's energy.
-    
-    Tone: Mystical but grounded, supportive, deep.
-    Language: Russian.
-    Length: Around 150-200 words. Format with simple paragraphs.
-  `;
+    // Map result to local card database
+    // Priority: card_name -> card_id -> fallback
+    let card: TarotCard | undefined = ALL_CARDS.find(
+      c => c.name.toLowerCase() === resultJson.card_name?.toLowerCase()
+    );
 
-  const response = await ai.models.generateContent({
-    model: MODEL_FAST,
-    contents: prompt,
-  });
+    if (!card && typeof resultJson.card_id === 'number') {
+      card = ALL_CARDS[resultJson.card_id];
+    }
 
-  return response.text || "Не удалось получить толкование. Попробуйте еще раз.";
-};
+    if (!card) {
+      console.warn("Card not found, using default");
+      card = ALL_CARDS[0];
+    }
 
-/**
- * 3. Generate Unique Image (Optimized via Pollinations.ai)
- */
-export const generatePersonalizedImage = async (userInput: string, card: TarotCard): Promise<string | null> => {
-  // Truncate user input to 100 chars and remove special chars to prevent URL issues
-  const safeInput = userInput.slice(0, 100).replace(/[^\w\sа-яА-ЯёЁ\.,]/gi, '');
-  
-  // Construct a prompt that combines the Tarot Archetype with the user's psychological state
-  const prompt = `Tarot card masterpiece, ${card.name}, ${card.keyword}, psychological state: ${safeInput}. Mystical, ethereal, cinematic lighting, gold and dark blue colors, highly detailed, 8k, digital painting`;
-  
-  const encodedPrompt = encodeURIComponent(prompt);
-  const seed = Math.floor(Math.random() * 99999); // Random seed to force fresh generation
-  
-  // Use parameters for maximum speed (model=turbo, 768x1024)
-  const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&width=768&height=1024&nologo=true&seed=${seed}`;
+    // Generate Pollinations Image URL
+    const imagePrompt = resultJson.image_prompt || `${card.name} tarot card, mystical`;
+    // Clean prompt for URL
+    const safePrompt = encodeURIComponent(imagePrompt);
+    const generatedImageUrl = `https://image.pollinations.ai/prompt/${safePrompt}?model=turbo&width=768&height=1024&nologo=true`;
 
-  // Return the URL directly. The browser will trigger the generation when it loads the image.
-  return url;
+    return {
+      card,
+      interpretation: resultJson.interpretation || "Толкование не получено.",
+      generatedImageUrl
+    };
+
+  } catch (error) {
+    console.error("Analysis Service Error:", error);
+    throw error;
+  }
 };

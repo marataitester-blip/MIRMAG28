@@ -13,9 +13,7 @@ export interface AnalysisResult {
 
 export enum AnalysisStep {
   IDLE = 'IDLE',
-  ANALYZING = 'ANALYZING', // Selecting the card
-  PAINTING = 'PAINTING',   // Generating image
-  INTERPRETING = 'INTERPRETING', // Writing text
+  PROCESSING = 'PROCESSING', // Combined analysis and generation
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR'
 }

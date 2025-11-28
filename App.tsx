@@ -1,7 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
-import * as GeminiService from './services/geminiService';
+import { analyzeSituation } from './services/geminiService'; // Logic is now Groq-based
 import { CardDisplay } from './components/CardDisplay';
 import { Sparkles, RefreshCcw } from 'lucide-react';
 
@@ -9,6 +8,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [step, setStep] = useState<AnalysisStep>(AnalysisStep.IDLE);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -16,27 +16,14 @@ export default function App() {
     if (!input.trim()) return;
     
     setResult(null);
-    setStep(AnalysisStep.ANALYZING);
+    setErrorMessage(null);
+    setStep(AnalysisStep.PROCESSING);
     
     try {
-      // 1. Find Card
-      const card = await GeminiService.findBestMatchingCard(input);
-      setResult({ card, interpretation: '', generatedImageUrl: null });
+      // Single step: Analyze text -> Pick Card -> Generate Image Link
+      const analysisResult = await analyzeSituation(input);
       
-      // 2. Start parallel generation
-      setStep(AnalysisStep.PAINTING);
-      
-      const [interpretation, genImage] = await Promise.all([
-        GeminiService.generateInterpretation(input, card),
-        GeminiService.generatePersonalizedImage(input, card)
-      ]);
-
-      setResult({
-        card,
-        interpretation,
-        generatedImageUrl: genImage
-      });
-      
+      setResult(analysisResult);
       setStep(AnalysisStep.COMPLETED);
       
       setTimeout(() => {
@@ -45,6 +32,7 @@ export default function App() {
 
     } catch (error: any) {
       console.error("Workflow failed", error);
+      setErrorMessage(error.message || "Произошла ошибка связи с космосом");
       setStep(AnalysisStep.ERROR);
     }
   };
@@ -52,6 +40,7 @@ export default function App() {
   const reset = () => {
     setInput('');
     setResult(null);
+    setErrorMessage(null);
     setStep(AnalysisStep.IDLE);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -101,24 +90,23 @@ export default function App() {
         )}
 
         {/* Loading State */}
-        {step !== AnalysisStep.IDLE && step !== AnalysisStep.COMPLETED && step !== AnalysisStep.ERROR && (
+        {step === AnalysisStep.PROCESSING && (
           <div className="loading-container">
             <div className="spinner-box">
                <div className="spinner-ring"></div>
                <div className="spinner-active"></div>
             </div>
             <h3 style={{fontFamily: 'Cinzel, serif', color: 'var(--accent-gold)', fontSize: '1.25rem'}}>
-              {step === AnalysisStep.ANALYZING && "Подбор Архетипа..."}
-              {step === AnalysisStep.PAINTING && "Создание образа и толкование..."}
+              Обращение к коллективному бессознательному...
             </h3>
             <p style={{color: 'var(--text-muted)'}}>
-                Нейросеть обращается к коллективному бессознательному
+                Анализ архетипов и формирование образа
             </p>
           </div>
         )}
 
         {/* Results */}
-        {result && (step === AnalysisStep.PAINTING || step === AnalysisStep.COMPLETED) && (
+        {result && step === AnalysisStep.COMPLETED && (
           <div ref={resultRef}>
             
             {/* Cards Grid */}
@@ -135,6 +123,7 @@ export default function App() {
                     title="Ваш Портрет"
                     subtitle="Отражение состояния"
                     isGenerated={true}
+                    // If URL is present, it will try to load. If Pollinations is slow, CardDisplay shows spinner.
                     isLoading={!result.generatedImageUrl}
                 />
             </div>
@@ -158,11 +147,7 @@ export default function App() {
                         {result.interpretation}
                      </div>
                  ) : (
-                     <div style={{display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '2rem'}}>
-                        <span style={{width: '8px', height: '8px', backgroundColor: 'var(--accent-gold)', borderRadius: '50%'}}></span>
-                        <span style={{width: '8px', height: '8px', backgroundColor: 'var(--accent-gold)', borderRadius: '50%'}}></span>
-                        <span style={{width: '8px', height: '8px', backgroundColor: 'var(--accent-gold)', borderRadius: '50%'}}></span>
-                     </div>
+                     <p>Толкование отсутствует</p>
                  )}
             </div>
 
@@ -181,7 +166,7 @@ export default function App() {
              <div className="interpretation-card" style={{borderColor: '#f87171'}}>
                 <h3 style={{color: '#f87171', textAlign: 'center'}}>Произошла ошибка</h3>
                 <p style={{textAlign: 'center', color: 'var(--text-muted)'}}>
-                    Не удалось установить связь с архетипом. Попробуйте еще раз или проверьте соединение.
+                    {errorMessage || "Не удалось установить связь с сервером."}
                 </p>
                 <div className="reset-wrapper">
                     <button onClick={() => setStep(AnalysisStep.IDLE)} className="btn-reset">
