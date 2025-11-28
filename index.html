@@ -25,40 +25,16 @@
       tailwind.config = {
         theme: {
           extend: {
-            colors: {
-              astral: {
-                bg: '#0f0f14',
-                card: '#16161d',
-                fg: '#eae6df',
-                muted: '#c9c3b8',
-                accent: '#c7a87b',
-                accentHover: '#e0c090'
-              }
-            },
             fontFamily: {
               cinzel: ['"Cinzel"', 'serif'],
               cormorant: ['"Cormorant Garamond"', 'serif'],
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.7s ease-out forwards',
-              'fade-in-up': 'fadeInUp 0.7s ease-out forwards',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
             }
           }
         }
       }
     </script>
     <style>
-      /* Enforce dark theme immediately to prevent white flashes */
+      /* Enforce dark theme and text color globally using standard CSS */
       body {
         background-color: #0f0f14;
         color: #eae6df;
@@ -66,7 +42,14 @@
         min-height: 100vh;
         margin: 0;
       }
-      /* Custom scrollbar for text areas */
+      h1, h2, h3, h4, h5, h6 {
+        color: #c7a87b; /* Gold accent for headers */
+        font-family: "Cinzel", serif;
+      }
+      p, span, div {
+        color: #eae6df; /* Light text for body */
+      }
+      /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -93,7 +76,7 @@
 }
 </script>
 </head>
-  <body class="bg-astral-bg text-astral-fg">
+  <body class="bg-[#0f0f14] text-[#eae6df]">
     <div id="root"></div>
   </body>
 </html>

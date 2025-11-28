@@ -33,15 +33,15 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
     <div className="flex flex-col items-center w-full max-w-[300px] mx-auto group">
       <div className={`
         relative w-full aspect-[600/1040] rounded-xl overflow-hidden 
-        border border-astral-accent/30 shadow-lg transition-all duration-500
-        ${showLoading ? 'animate-pulse bg-astral-card' : 'bg-black'}
+        border border-[#c7a87b]/30 shadow-lg transition-all duration-500
+        ${showLoading ? 'animate-pulse bg-[#16161d]' : 'bg-black'}
         ${isGenerated ? 'shadow-[0_0_20px_rgba(199,168,123,0.3)]' : ''}
       `}>
         
         {/* Loading Spinner */}
         {showLoading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-12 h-12 border-2 border-astral-accent border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-2 border-[#c7a87b] border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
@@ -58,7 +58,7 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
 
         {/* Error / Empty State */}
         {(!imageSrc || hasError) && !showLoading && (
-          <div className="flex flex-col items-center justify-center h-full text-astral-muted text-sm p-4 text-center">
+          <div className="flex flex-col items-center justify-center h-full text-[#c9c3b8] text-sm p-4 text-center">
             {hasError ? (
                 <>
                     <span className="text-2xl mb-2 text-red-400">✕</span>
@@ -73,7 +73,7 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
         {/* Overlay Label for Generated/Original */}
         {isImgLoaded && (
             <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-3 pointer-events-none">
-                <span className="text-astral-accent text-xs font-cinzel tracking-widest uppercase">
+                <span className="text-[#c7a87b] text-xs font-cinzel tracking-widest uppercase">
                     {isGenerated ? "Уникальный Образ" : "Архетип Колоды"}
                 </span>
             </div>
@@ -81,8 +81,8 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
       </div>
       
       <div className="mt-4 text-center">
-        <h3 className="font-cinzel text-xl text-astral-accent">{title}</h3>
-        {subtitle && <p className="font-cormorant text-astral-muted italic">{subtitle}</p>}
+        <h3 className="font-cinzel text-xl text-[#c7a87b]">{title}</h3>
+        {subtitle && <p className="font-cormorant text-[#c9c3b8] italic">{subtitle}</p>}
       </div>
     </div>
   );

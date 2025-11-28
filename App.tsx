@@ -60,14 +60,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen pb-12 bg-astral-bg text-astral-fg font-cormorant">
+    <div className="min-h-screen pb-12 bg-[#0f0f14] text-[#eae6df] font-cormorant">
       
       {/* Header */}
       <header className="pt-8 pb-6 text-center px-4">
-        <h1 className="font-cinzel text-3xl md:text-4xl text-astral-accent font-bold tracking-wider mb-2">
+        <h1 className="font-cinzel text-3xl md:text-4xl text-[#c7a87b] font-bold tracking-wider mb-2">
           Astral Hero
         </h1>
-        <p className="font-cormorant text-astral-muted text-lg italic opacity-80">
+        <p className="font-cormorant text-[#c9c3b8] text-lg italic opacity-80">
           Психологический Портрет
         </p>
       </header>
@@ -76,13 +76,13 @@ export default function App() {
       <main className="max-w-2xl mx-auto px-5">
         
         {step === AnalysisStep.IDLE && (
-            <div className="animate-fade-in-up">
-                <div className="bg-astral-card border border-astral-accent/20 rounded-2xl p-6 shadow-2xl mb-8">
-                <label className="block text-astral-accent font-cinzel text-lg mb-3">
+            <div>
+                <div className="bg-[#16161d] border border-[#c7a87b]/20 rounded-2xl p-6 shadow-2xl mb-8">
+                <label className="block text-[#c7a87b] font-cinzel text-lg mb-3">
                     Опишите ваше состояние или ситуацию
                 </label>
                 <textarea
-                    className="w-full bg-[#0a0a0e] text-astral-fg border border-astral-muted/20 rounded-xl p-4 min-h-[150px] focus:border-astral-accent focus:outline-none focus:ring-1 focus:ring-astral-accent transition-all font-cormorant text-lg resize-y"
+                    className="w-full bg-[#0a0a0e] text-[#eae6df] border border-[#c9c3b8]/20 rounded-xl p-4 min-h-[150px] focus:border-[#c7a87b] focus:outline-none focus:ring-1 focus:ring-[#c7a87b] transition-all font-cormorant text-lg resize-y placeholder-gray-600"
                     placeholder="Например: Я чувствую себя потерянным перед важным выбором, но внутри есть надежда..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -91,7 +91,7 @@ export default function App() {
                     <button
                     onClick={handleAnalyze}
                     disabled={!input.trim()}
-                    className="group flex items-center gap-2 bg-transparent border-2 border-astral-accent text-astral-accent px-6 py-2 rounded-full font-cinzel font-bold hover:bg-astral-accent hover:text-astral-bg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group flex items-center gap-2 bg-transparent border-2 border-[#c7a87b] text-[#c7a87b] px-6 py-2 rounded-full font-cinzel font-bold hover:bg-[#c7a87b] hover:text-[#0f0f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                     <span>Раскрыть</span>
                     <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
@@ -100,7 +100,7 @@ export default function App() {
                 </div>
 
                 <div className="text-center">
-                    <a href="https://t.me/+y7Inf371g7w0NzMy" target="_blank" rel="noreferrer" className="inline-block text-astral-muted text-sm hover:text-astral-accent transition-colors border-b border-transparent hover:border-astral-accent pb-1">
+                    <a href="https://t.me/+y7Inf371g7w0NzMy" target="_blank" rel="noreferrer" className="inline-block text-[#c9c3b8] text-sm hover:text-[#c7a87b] transition-colors border-b border-transparent hover:border-[#c7a87b] pb-1">
                         Связь с Мастером
                     </a>
                 </div>
@@ -109,16 +109,16 @@ export default function App() {
 
         {/* Loading State */}
         {step !== AnalysisStep.IDLE && step !== AnalysisStep.COMPLETED && step !== AnalysisStep.ERROR && (
-          <div className="py-20 text-center space-y-4 animate-pulse">
+          <div className="py-20 text-center space-y-4">
             <div className="inline-block relative w-20 h-20">
-               <div className="absolute inset-0 border-4 border-astral-accent/30 rounded-full"></div>
-               <div className="absolute inset-0 border-4 border-t-astral-accent rounded-full animate-spin"></div>
+               <div className="absolute inset-0 border-4 border-[#c7a87b]/30 rounded-full"></div>
+               <div className="absolute inset-0 border-4 border-t-[#c7a87b] rounded-full animate-spin"></div>
             </div>
-            <h3 className="font-cinzel text-xl text-astral-accent">
+            <h3 className="font-cinzel text-xl text-[#c7a87b]">
               {step === AnalysisStep.ANALYZING && "Подбор Архетипа..."}
               {step === AnalysisStep.PAINTING && "Создание образа и толкование..."}
             </h3>
-            <p className="text-astral-muted font-cormorant">
+            <p className="text-[#c9c3b8] font-cormorant">
                 Нейросеть обращается к коллективному бессознательному
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function App() {
 
         {/* Results */}
         {result && (step === AnalysisStep.PAINTING || step === AnalysisStep.COMPLETED) && (
-          <div ref={resultRef} className="space-y-12 animate-fade-in">
+          <div ref={resultRef} className="space-y-12">
             
             {/* Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
@@ -149,22 +149,22 @@ export default function App() {
             </div>
 
             {/* Interpretation Text */}
-            <div className="bg-astral-card border border-astral-accent/20 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-astral-accent to-transparent opacity-50"></div>
+            <div className="bg-[#16161d] border border-[#c7a87b]/20 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#c7a87b] to-transparent opacity-50"></div>
                  
-                 <h2 className="font-cinzel text-2xl text-astral-accent mb-6 text-center">
+                 <h2 className="font-cinzel text-2xl text-[#c7a87b] mb-6 text-center">
                     Психологическое Толкование
                  </h2>
                  
                  {result.interpretation ? (
-                     <div className="text-lg md:text-xl leading-relaxed text-astral-fg whitespace-pre-line font-cormorant text-justify">
+                     <div className="text-lg md:text-xl leading-relaxed text-[#eae6df] whitespace-pre-line font-cormorant text-justify">
                         {result.interpretation}
                      </div>
                  ) : (
-                     <div className="h-32 flex items-center justify-center space-x-2 text-astral-muted">
-                        <span className="w-2 h-2 bg-astral-accent rounded-full animate-bounce"></span>
-                        <span className="w-2 h-2 bg-astral-accent rounded-full animate-bounce delay-75"></span>
-                        <span className="w-2 h-2 bg-astral-accent rounded-full animate-bounce delay-150"></span>
+                     <div className="h-32 flex items-center justify-center space-x-2 text-[#c9c3b8]">
+                        <span className="w-2 h-2 bg-[#c7a87b] rounded-full animate-bounce"></span>
+                        <span className="w-2 h-2 bg-[#c7a87b] rounded-full animate-bounce delay-75"></span>
+                        <span className="w-2 h-2 bg-[#c7a87b] rounded-full animate-bounce delay-150"></span>
                      </div>
                  )}
             </div>
@@ -173,7 +173,7 @@ export default function App() {
             <div className="flex justify-center pb-10">
                 <button 
                     onClick={reset}
-                    className="flex items-center gap-2 text-astral-muted hover:text-astral-accent transition-colors font-cinzel"
+                    className="flex items-center gap-2 text-[#c9c3b8] hover:text-[#c7a87b] transition-colors font-cinzel"
                 >
                     <RefreshCcw className="w-5 h-5" />
                     <span>Новый запрос</span>
