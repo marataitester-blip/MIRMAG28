@@ -3,13 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000', // Adjust if you run backend on different port
-        changeOrigin: true,
-        // If using Vercel Dev, this might not be needed, but good for custom node server
-      }
-    }
+  build: {
+    outDir: 'dist',
   }
 });
