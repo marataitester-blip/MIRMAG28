@@ -1,8 +1,9 @@
+
 import React, { useState, useRef } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
 import * as GeminiService from './services/geminiService';
 import { CardDisplay } from './components/CardDisplay';
-import { Send, Sparkles, RefreshCcw } from 'lucide-react';
+import { Sparkles, RefreshCcw } from 'lucide-react';
 
 export default function App() {
   const [input, setInput] = useState('');
@@ -42,7 +43,7 @@ export default function App() {
         resultRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Workflow failed", error);
       setStep(AnalysisStep.ERROR);
     }
@@ -174,6 +175,20 @@ export default function App() {
             </div>
 
           </div>
+        )}
+        
+        {step === AnalysisStep.ERROR && (
+             <div className="interpretation-card" style={{borderColor: '#f87171'}}>
+                <h3 style={{color: '#f87171', textAlign: 'center'}}>Произошла ошибка</h3>
+                <p style={{textAlign: 'center', color: 'var(--text-muted)'}}>
+                    Не удалось установить связь с архетипом. Попробуйте еще раз или проверьте соединение.
+                </p>
+                <div className="reset-wrapper">
+                    <button onClick={() => setStep(AnalysisStep.IDLE)} className="btn-reset">
+                        Попробовать снова
+                    </button>
+                </div>
+             </div>
         )}
       </main>
     </div>

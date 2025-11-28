@@ -2,16 +2,20 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { ALL_CARDS } from '../constants';
 import { TarotCard } from '../types';
 
-// Initialize Gemini
-// NOTE: Process.env.API_KEY is handled by the runtime environment
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// NOTE: We initialize the client inside functions to ensure process.env.API_KEY is available
+// after the user selects it via window.aistudio.openSelectKey()
 
 const MODEL_FAST = 'gemini-2.5-flash';
+
+const getAiClient = () => {
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 /**
  * 1. Analyze input and select the best card
  */
 export const findBestMatchingCard = async (userInput: string): Promise<TarotCard> => {
+  const ai = getAiClient();
   const cardList = ALL_CARDS.map(c => `"${c.name}" (${c.keyword})`).join(", ");
   
   const prompt = `
@@ -58,6 +62,7 @@ export const findBestMatchingCard = async (userInput: string): Promise<TarotCard
  * 2. Generate Psychological Interpretation
  */
 export const generateInterpretation = async (userInput: string, card: TarotCard): Promise<string> => {
+  const ai = getAiClient();
   const prompt = `
     You are a compassionate psychological counselor and Tarot expert.
     
