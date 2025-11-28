@@ -1,6 +1,8 @@
+
 import { TarotCard } from './types';
 
 export const ALL_CARDS: TarotCard[] = [
+    // 0-23 Major Arcana
     { name: "Шут", keyword: "Доверие, Начало", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/00_fool.png" },
     { name: "Маг", keyword: "Воля, Мастерство", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/01_magician.png" },
     { name: "Верховная Жрица", keyword: "Тайна, Интуиция", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/02_high_priestess.png" },
@@ -25,6 +27,8 @@ export const ALL_CARDS: TarotCard[] = [
     { name: "Мир", keyword: "Завершение, Целостность", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/21_world.png" },
     { name: "Герой", keyword: "Опыт, Осмысление", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/22_hero.png" },
     { name: "Белая карта", keyword: "Свобода Воли, Потенциал", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/23_white_card.png" },
+
+    // Wands
     { name: "Туз Жезлов", keyword: "Искра", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_01_ace.png" },
     { name: "Двойка Жезлов", keyword: "План", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_02_two.png" },
     { name: "Тройка Жезлов", keyword: "Ожидание", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_03_three.png" },
@@ -39,6 +43,8 @@ export const ALL_CARDS: TarotCard[] = [
     { name: "Рыцарь Жезлов", keyword: "Порыв", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_12_knight.png" },
     { name: "Королева Жезлов", keyword: "Харизма", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_13_queen.png" },
     { name: "Король Жезлов", keyword: "Лидерство", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_14_king.png" },
+
+    // Cups
     { name: "Туз Кубков", keyword: "Чувства", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_01_ace.png" },
     { name: "Двойка Кубков", keyword: "Партнерство", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_02_two.png" },
     { name: "Тройка Кубков", keyword: "Празднование", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_03_three.png" },
@@ -53,6 +59,8 @@ export const ALL_CARDS: TarotCard[] = [
     { name: "Рыцарь Кубков", keyword: "Романтика", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_12_knight.png" },
     { name: "Королева Кубков", keyword: "Эмпатия", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_13_queen.png" },
     { name: "Король Кубков", keyword: "Поддержка", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/cups_14_king.png" },
+
+    // Swords
     { name: "Туз Мечей", keyword: "Ясность", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_01_ace.png" },
     { name: "Двойка Мечей", keyword: "Нерешительность", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_02_two.png" },
     { name: "Тройка Мечей", keyword: "Боль", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_03_three.png" },
@@ -67,6 +75,8 @@ export const ALL_CARDS: TarotCard[] = [
     { name: "Рыцарь Мечей", keyword: "Решительность", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_12_knight.png" },
     { name: "Королева Мечей", keyword: "Независимость", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_13_queen.png" },
     { name: "Король Мечей", keyword: "Интеллект", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/swords_14_king.png" },
+
+    // Pentacles
     { name: "Туз Пентаклей", keyword: "Шанс", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/pentacles_01_ace.png" },
     { name: "Двойка Пентаклей", keyword: "Балансирование", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/pentacles_02_two.png" },
     { name: "Тройка Пентаклей", keyword: "Мастерство", imageUrl: "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/pentacles_03_three.png" },
