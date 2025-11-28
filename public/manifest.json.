@@ -1,1 +1,39 @@
+{
 
+  "name": "Astral Hero",
+
+  "short_name": "TarotPortrait",
+
+  "start_url": "/",
+
+  "display": "standalone",
+
+  "background_color": "#0f0f14",
+
+  "theme_color": "#0f0f14",
+
+  "icons": [
+
+    {
+
+      "src": "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png",
+
+      "sizes": "192x192",
+
+      "type": "image/png"
+
+    },
+
+    {
+
+      "src": "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png",
+
+      "sizes": "512x512",
+
+      "type": "image/png"
+
+    }
+
+  ]
+
+}
