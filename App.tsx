@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
 import { CardDisplay } from './components/CardDisplay';
-import { Sparkles, RefreshCcw } from 'lucide-react';
+import { Sparkles, RefreshCcw, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [input, setInput] = useState('');
@@ -19,20 +19,33 @@ export default function App() {
     setStep(AnalysisStep.PROCESSING);
     
     try {
-      // Logic: Send text to backend API
+      // Safe Fetch Logic
       const response = await fetch('/api/analyze', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ mode: 'groq', userRequest: input })
       });
 
+      // Parse JSON first to extract potential server error messages
+      const data = await response.json();
+
+      // 1. Check for HTTP errors
       if (!response.ok) {
-        throw new Error(`Server connection error: ${response.status}`);
+        throw new Error(data.error || `Ошибка сервера: ${response.status}`);
       }
 
-      const analysisResult: AnalysisResult = await response.json();
-      
-      setResult(analysisResult);
+      // 2. Check for explicit API errors
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // 3. Validate Data Integrity (Crucial!)
+      if (!data.generatedImageUrl || !data.interpretation) {
+        console.error("Bad response format:", data);
+        throw new Error("Сервер вернул неполные данные (нет изображения или толкования)");
+      }
+
+      setResult(data);
       setStep(AnalysisStep.COMPLETED);
       
       setTimeout(() => {
@@ -78,13 +91,13 @@ export default function App() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                     />
-                    <div className="btn-wrapper">
+                    <div className="btn-wrapper" style={{gap: '10px'}}>
                         <button
                             onClick={handleAnalyze}
                             disabled={!input.trim()}
                             className="btn-primary"
                         >
-                            <span>Раскрыть</span>
+                            <span>🚀 GROQ FAST</span>
                             <Sparkles size={20} />
                         </button>
                     </div>
@@ -109,7 +122,7 @@ export default function App() {
               Обращение к коллективному бессознательному...
             </h3>
             <p style={{color: 'var(--text-muted)'}}>
-                Анализ архетипов и формирование образа
+                Анализ архетипов и формирование образа (Groq Llama-3)
             </p>
           </div>
         )}
@@ -120,21 +133,30 @@ export default function App() {
             
             {/* Cards Grid */}
             <div className="results-grid">
-                <CardDisplay 
-                    imageSrc={result.card.imageUrl}
-                    title={result.card.name}
-                    subtitle={result.card.keyword}
-                    isGenerated={false}
-                />
+                {/* 
+                   Safe Render: Only render if we have data.
+                   The backend now returns the 'generatedImageUrl' inside the 'card' object too 
+                   to simplify mapping, but we kept the dual display structure.
+                */}
                 
-                <CardDisplay 
-                    imageSrc={result.generatedImageUrl}
-                    title="Ваш Портрет"
-                    subtitle="Отражение состояния"
-                    isGenerated={true}
-                    // If URL is present, it will try to load.
-                    isLoading={!result.generatedImageUrl}
-                />
+                {result.card && (
+                    <CardDisplay 
+                        imageSrc={result.card.imageUrl}
+                        title={result.card.name}
+                        subtitle={result.card.keyword}
+                        isGenerated={false}
+                    />
+                )}
+                
+                {result.generatedImageUrl && (
+                    <CardDisplay 
+                        imageSrc={result.generatedImageUrl}
+                        title="Ваш Портрет"
+                        subtitle="Отражение состояния"
+                        isGenerated={true}
+                        isLoading={false} 
+                    />
+                )}
             </div>
 
             {/* Interpretation Text */}
@@ -151,13 +173,9 @@ export default function App() {
                     Психологическое Толкование
                  </h2>
                  
-                 {result.interpretation ? (
-                     <div className="interpretation-text">
-                        {result.interpretation}
-                     </div>
-                 ) : (
-                     <p>Толкование отсутствует</p>
-                 )}
+                 <div className="interpretation-text">
+                    {result.interpretation}
+                 </div>
             </div>
 
             {/* Reset Button */}
