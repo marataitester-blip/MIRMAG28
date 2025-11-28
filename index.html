@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIRMAG: Психологический Портрет</title>
     
-    <!-- Fix deprecation warning -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f0f14">
     
-    <!-- Fix Favicon 404 -->
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png">
     <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png">
 
@@ -19,37 +17,323 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- CRITICAL: Force styles to ensure text is visible even if Tailwind loads late -->
     <style>
+        :root {
+            --bg-color: #0f0f14;
+            --card-bg: #16161d;
+            --text-color: #eae6df;
+            --text-muted: #c9c3b8;
+            --accent-gold: #c7a87b;
+            --accent-glow: rgba(199, 168, 123, 0.3);
+            --border-color: rgba(199, 168, 123, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         html, body {
-            background-color: #0f0f14 !important;
-            color: #eae6df !important;
             margin: 0;
             padding: 0;
-            min-height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* --- Layout --- */
+        .app-wrapper {
+            min-height: 100vh;
+            padding-bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 1rem 1.5rem;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 1.2rem;
+            margin: 0.5rem 0 0;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 800px; /* max-w-2xl */
+            padding: 0 1.25rem; /* px-5 */
+        }
+
+        /* --- Input Section --- */
+        .input-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: block;
+            color: var(--accent-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 1.125rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .styled-textarea {
+            width: 100%;
+            background-color: #0a0a0e;
+            color: var(--text-color);
+            border: 1px solid rgba(201, 195, 184, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-height: 150px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.125rem;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .styled-textarea:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--accent-gold);
+            color: var(--bg-color);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .footer-link {
+            text-align: center;
+        }
+        .footer-link a {
+            color: var(--text-muted);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+        .footer-link a:hover {
+            color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        /* --- Loading --- */
+        .loading-container {
+            padding: 5rem 0;
+            text-align: center;
+        }
+        .spinner-box {
+            position: relative;
+            width: 5rem;
+            height: 5rem;
+            margin: 0 auto 1rem;
+        }
+        .spinner-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 4px solid var(--border-color);
+        }
+        .spinner-active {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: var(--accent-gold);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Results --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+            }
+        }
+
+        /* --- Text Interpretation --- */
+        .interpretation-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 3rem;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .interpretation-text {
+            font-size: 1.125rem;
+            white-space: pre-line;
+            text-align: justify;
+        }
+        @media (min-width: 768px) {
+            .interpretation-text { font-size: 1.25rem; }
+            .interpretation-card { padding: 2rem; }
+        }
+
+        /* --- Reset Btn --- */
+        .reset-wrapper {
+            display: flex;
+            justify-content: center;
+            padding: 2.5rem 0;
+        }
+        .btn-reset {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-reset:hover {
+            color: var(--accent-gold);
+        }
+
+        /* --- Card Component Styles --- */
+        .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .card-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 600/1040;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: #000;
+            transition: all 0.5s;
+        }
+        .card-frame.loading {
+            background-color: var(--card-bg);
+        }
+        .card-frame.generated {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.7s;
+        }
+        .card-img.loaded {
+            opacity: 1;
+        }
+        .card-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .card-tag {
+            color: var(--accent-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .card-info {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.25rem;
+            color: var(--accent-gold);
+            margin: 0;
+        }
+        .card-subtitle {
+            font-style: italic;
+            color: var(--text-muted);
+            margin: 0;
         }
         
-        /* Force text color on inputs and buttons specifically */
-        textarea, input, select {
-            color: #eae6df !important;
-            background-color: #16161d !important;
+        /* Spinner for Card */
+        .card-loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
-        
-        h1, h2, h3, button {
-            color: #c7a87b !important; /* Gold accent for headers and buttons */
+        .mini-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 2px solid var(--accent-gold);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        
-        button span {
-            color: inherit !important;
-        }
-        
-        /* Ensure placeholders are visible */
-        ::placeholder {
-            color: #c9c3b8 !important;
-            opacity: 0.7;
+
+        /* Error state */
+        .card-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 1rem;
         }
     </style>
     
@@ -67,7 +351,12 @@
 </script>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <!-- Initial loading state visible before React mounts -->
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;color:#c7a87b;font-family:serif;">
+            Загрузка...
+        </div>
+    </div>
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>

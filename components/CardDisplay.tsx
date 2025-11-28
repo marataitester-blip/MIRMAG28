@@ -18,30 +18,27 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
   const [isImgLoaded, setIsImgLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Reset state when source changes
   useEffect(() => {
     setIsImgLoaded(false);
     setHasError(false);
   }, [imageSrc]);
 
-  // Show loading if:
-  // 1. Parent says we are waiting for the URL (externalLoading)
-  // 2. We have a URL (imageSrc) but the browser hasn't loaded the bytes yet (!isImgLoaded) and no error occurred
+  // Determine logic for showing spinner
   const showLoading = externalLoading || (imageSrc && !isImgLoaded && !hasError);
 
+  // Dynamic class for the frame
+  let frameClass = "card-frame";
+  if (showLoading) frameClass += " loading";
+  if (isGenerated) frameClass += " generated";
+
   return (
-    <div className="flex flex-col items-center w-full max-w-[300px] mx-auto group">
-      <div className={`
-        relative w-full aspect-[600/1040] rounded-xl overflow-hidden 
-        border border-[#c7a87b]/30 shadow-lg transition-all duration-500
-        ${showLoading ? 'animate-pulse bg-[#16161d]' : 'bg-black'}
-        ${isGenerated ? 'shadow-[0_0_20px_rgba(199,168,123,0.3)]' : ''}
-      `}>
+    <div className="card-wrapper">
+      <div className={frameClass}>
         
         {/* Loading Spinner */}
         {showLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-12 h-12 border-2 border-[#c7a87b] border-t-transparent rounded-full animate-spin"></div>
+          <div className="card-loader">
+            <div className="mini-spinner"></div>
           </div>
         )}
 
@@ -50,7 +47,7 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
           <img 
             src={imageSrc} 
             alt={title} 
-            className={`w-full h-full object-cover transition-opacity duration-700 ${isImgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`card-img ${isImgLoaded ? 'loaded' : ''}`}
             onLoad={() => setIsImgLoaded(true)}
             onError={() => setHasError(true)}
           />
@@ -58,10 +55,10 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
 
         {/* Error / Empty State */}
         {(!imageSrc || hasError) && !showLoading && (
-          <div className="flex flex-col items-center justify-center h-full text-[#c9c3b8] text-sm p-4 text-center">
+          <div className="card-error">
             {hasError ? (
                 <>
-                    <span className="text-2xl mb-2 text-red-400">✕</span>
+                    <span style={{fontSize: '1.5rem', color: '#f87171'}}>✕</span>
                     <p>Не удалось загрузить образ</p>
                 </>
             ) : (
@@ -72,17 +69,17 @@ export const CardDisplay: React.FC<CardDisplayProps> = ({
         
         {/* Overlay Label for Generated/Original */}
         {isImgLoaded && (
-            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-3 pointer-events-none">
-                <span className="text-[#c7a87b] text-xs font-cinzel tracking-widest uppercase">
+            <div className="card-overlay">
+                <span className="card-tag">
                     {isGenerated ? "Уникальный Образ" : "Архетип Колоды"}
                 </span>
             </div>
         )}
       </div>
       
-      <div className="mt-4 text-center">
-        <h3 className="font-cinzel text-xl text-[#c7a87b]">{title}</h3>
-        {subtitle && <p className="font-cormorant text-[#c9c3b8] italic">{subtitle}</p>}
+      <div className="card-info">
+        <h3 className="card-title">{title}</h3>
+        {subtitle && <p className="card-subtitle">{subtitle}</p>}
       </div>
     </div>
   );
