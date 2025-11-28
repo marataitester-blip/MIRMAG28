@@ -1,70 +1,29 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Astral Hero: Психологический Портрет</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRMAG: Психологический Портрет</title>
     
-    <!-- PWA Settings -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Astral Hero">
-    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png">
-    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png">
     <meta name="theme-color" content="#0f0f14">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/icon-180.png">
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              cinzel: ['"Cinzel"', 'serif'],
-              cormorant: ['"Cormorant Garamond"', 'serif'],
-            }
-          }
-        }
-      }
-    </script>
     <style>
-      /* Enforce dark theme and text color globally using standard CSS */
-      body {
-        background-color: #0f0f14;
-        color: #eae6df;
-        font-family: "Cormorant Garamond", serif;
-        min-height: 100vh;
-        margin: 0;
-      }
-      h1, h2, h3, h4, h5, h6 {
-        color: #c7a87b; /* Gold accent for headers */
-        font-family: "Cinzel", serif;
-      }
-      p, span, div {
-        color: #eae6df; /* Light text for body */
-      }
-      /* Custom scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #0f0f14; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #333; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #c7a87b; 
-      }
+        body {
+            background-color: #0f0f14;
+            color: #eae6df;
+            margin: 0;
+        }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -76,7 +35,8 @@
 }
 </script>
 </head>
-  <body class="bg-[#0f0f14] text-[#eae6df]">
+<body>
     <div id="root"></div>
-  </body>
+    <script type="module" src="/index.tsx"></script>
+</body>
 </html>
