@@ -33,7 +33,7 @@ export default async function handler(req) {
             Верни ответ СТРОГО в формате JSON без лишнего текста и markdown-тегов.
             Структура JSON:
             {
-              "card_id": 0-77, (ID карты, если бы это был массив, но нам важно название)
+              "card_id": 0-77,
               "card_name": "Название карты (RU)",
               "keyword": "Ключевое слово",
               "interpretation": "Глубокое психологическое толкование состояния (RU, 3-4 предложения)",
@@ -73,28 +73,20 @@ export default async function handler(req) {
       throw new Error('Failed to parse AI response');
     }
 
-    // 2. Generate Pollinations Image URL
-    // We construct the URL here to keep the frontend dumb
+    // 2. Generate Pollinations Image URL (Optimized for Speed)
+    // Using model=turbo and 768x1024 dimensions as requested
     const promptEncoded = encodeURIComponent(parsedData.image_prompt);
-    const seed = Math.floor(Math.random() * 1000000);
-    const imageUrl = `https://image.pollinations.ai/prompt/${promptEncoded}?model=turbo&width=768&height=1024&nologo=true&seed=${seed}`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${promptEncoded}?model=turbo&width=768&height=1024&nologo=true`;
 
-    // 3. Match with local deck (simplified logic: just return what AI gave, frontend can try to match if needed, or we just trust AI)
-    // We will return a structure that matches the frontend's expected AnalysisResult
-    
-    // Attempt to map the generated card to our local known cards is hard on backend without the constants file.
-    // So we will pass the data needed for the frontend to render a "Generated" card primarily.
-    // The frontend logic currently expects: card (local), interpretation, generatedImageUrl.
-    
-    // We construct the response
+    // 3. Return Response
     return new Response(JSON.stringify({
       card: {
         name: parsedData.card_name,
         keyword: parsedData.keyword || "Архетип",
-        imageUrl: imageUrl // We use the generated image as the "card" image for the primary display
+        imageUrl: imageUrl
       },
       interpretation: parsedData.interpretation,
-      generatedImageUrl: imageUrl // Redundant but safe
+      generatedImageUrl: imageUrl
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
