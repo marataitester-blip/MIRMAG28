@@ -60,7 +60,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12 bg-astral-bg text-astral-fg">
       
       {/* Header */}
       <header className="pt-8 pb-6 text-center px-4">
@@ -82,7 +82,7 @@ export default function App() {
                     Опишите ваше состояние или ситуацию
                 </label>
                 <textarea
-                    className="w-full bg-[#0a0a0e] text-astral-fg border border-astral-muted/20 rounded-xl p-4 min-h-[150px] focus:border-astral-accent focus:outline-none focus:ring-1 focus:ring-astral-accent transition-all font-cormorant text-lg"
+                    className="w-full bg-[#0a0a0e] text-astral-fg border border-astral-muted/20 rounded-xl p-4 min-h-[150px] focus:border-astral-accent focus:outline-none focus:ring-1 focus:ring-astral-accent transition-all font-cormorant text-lg resize-y"
                     placeholder="Например: Я чувствую себя потерянным перед важным выбором, но внутри есть надежда..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -100,7 +100,7 @@ export default function App() {
                 </div>
 
                 <div className="text-center">
-                    <a href="https://t.me/+y7Inf371g7w0NzMy" target="_blank" rel="noreferrer" className="inline-block text-astral-muted/60 text-sm hover:text-astral-accent transition-colors border-b border-transparent hover:border-astral-accent">
+                    <a href="https://t.me/+y7Inf371g7w0NzMy" target="_blank" rel="noreferrer" className="inline-block text-astral-muted text-sm hover:text-astral-accent transition-colors border-b border-transparent hover:border-astral-accent pb-1">
                         Связь с Мастером
                     </a>
                 </div>

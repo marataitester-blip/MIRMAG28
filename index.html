@@ -2,7 +2,7 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Astral Hero: Психологический Портрет</title>
     
     <!-- PWA Settings -->
@@ -17,8 +17,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind with Typography Plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -36,6 +36,20 @@
             fontFamily: {
               cinzel: ['"Cinzel"', 'serif'],
               cormorant: ['"Cormorant Garamond"', 'serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.7s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.7s ease-out forwards',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
             }
           }
         }
@@ -46,6 +60,7 @@
         background-color: #0f0f14;
         color: #eae6df;
         font-family: "Cormorant Garamond", serif;
+        min-height: 100vh;
       }
       /* Custom scrollbar for text areas */
       ::-webkit-scrollbar {
