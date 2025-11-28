@@ -60,7 +60,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen pb-12 bg-astral-bg text-astral-fg">
+    <div className="min-h-screen pb-12 bg-astral-bg text-astral-fg font-cormorant">
       
       {/* Header */}
       <header className="pt-8 pb-6 text-center px-4">
@@ -157,7 +157,7 @@ export default function App() {
                  </h2>
                  
                  {result.interpretation ? (
-                     <div className="prose prose-invert prose-lg max-w-none font-cormorant leading-relaxed text-astral-fg whitespace-pre-line">
+                     <div className="text-lg md:text-xl leading-relaxed text-astral-fg whitespace-pre-line font-cormorant text-justify">
                         {result.interpretation}
                      </div>
                  ) : (
