@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
-import { analyzeSituation } from './services/geminiService'; // Logic is now Groq-based
 import { CardDisplay } from './components/CardDisplay';
 import { Sparkles, RefreshCcw } from 'lucide-react';
 
@@ -20,8 +19,18 @@ export default function App() {
     setStep(AnalysisStep.PROCESSING);
     
     try {
-      // Single step: Analyze text -> Pick Card -> Generate Image Link
-      const analysisResult = await analyzeSituation(input);
+      // Logic: Send text to backend API
+      const response = await fetch('/api/analyze', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ mode: 'groq', userRequest: input })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server connection error: ${response.status}`);
+      }
+
+      const analysisResult: AnalysisResult = await response.json();
       
       setResult(analysisResult);
       setStep(AnalysisStep.COMPLETED);
@@ -32,7 +41,7 @@ export default function App() {
 
     } catch (error: any) {
       console.error("Workflow failed", error);
-      setErrorMessage(error.message || "Произошла ошибка связи с космосом");
+      setErrorMessage(error.message || "Произошла ошибка связи с сервером");
       setStep(AnalysisStep.ERROR);
     }
   };
@@ -123,7 +132,7 @@ export default function App() {
                     title="Ваш Портрет"
                     subtitle="Отражение состояния"
                     isGenerated={true}
-                    // If URL is present, it will try to load. If Pollinations is slow, CardDisplay shows spinner.
+                    // If URL is present, it will try to load.
                     isLoading={!result.generatedImageUrl}
                 />
             </div>
