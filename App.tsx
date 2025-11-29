@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
 import { CardDisplay } from './components/CardDisplay';
@@ -13,64 +12,25 @@ export default function App() {
   
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Stop speech if component unmounts or resets
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
     };
   }, []);
 
- const handleAnalyze = async () => {
-  if (!input.trim()) return;
-  
-  setResult(null);
-  setErrorMessage(null);
-  setStep(AnalysisStep.PROCESSING);
-
-  // ===== ПОКАЗАТЬ ЛОАДЕР =====
-  showLoader();
-  
-  try {
-    const response = await fetch('/api/analyze', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ mode: 'groq', userRequest: input })
-    });
-
-    const data = await response.json();
-
-    // ===== СКРЫТЬ ЛОАДЕР =====
-    hideLoader();
-
-    if (!response.ok) {
-      throw new Error(data.error || `Ошибка сервера: ${response.status}`);
-    }
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    if (!data.generatedImageUrl || !data.interpretation) {
-      console.error("Bad response format:", data);
-      throw new Error("Сервер вернул неполные данные");
-    }
-
-    setResult(data);
-    setStep(AnalysisStep.COMPLETED);
+  const handleAnalyze = async () => {
+    if (!input.trim()) return;
     
-    setTimeout(() => {
-      resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-
-  } catch (error: any) {
-    // ===== СКРЫТЬ ЛОАДЕР ПРИ ОШИБКЕ =====
-    hideLoader();
+    setResult(null);
+    setErrorMessage(null);
+    setStep(AnalysisStep.PROCESSING);
     
-    console.error("Workflow failed", error);
-    setErrorMessage(error.message || "Произошла ошибка связи с сервером");
-    setStep(AnalysisStep.ERROR);
-  }
-};
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: input })
+      });
 
       const data = await response.json();
 
@@ -82,12 +42,21 @@ export default function App() {
         throw new Error(data.error);
       }
 
-      if (!data.generatedImageUrl || !data.interpretation) {
+      if (!data.imageUrl || !data.interpretation) {
         console.error("Bad response format:", data);
         throw new Error("Сервер вернул неполные данные");
       }
 
-      setResult(data);
+      setResult({
+        card: {
+          name: data.card_name,
+          keyword: '',
+          imageUrl: data.imageUrl
+        },
+        generatedImageUrl: data.imageUrl,
+        interpretation: data.interpretation
+      });
+      
       setStep(AnalysisStep.COMPLETED);
       
       setTimeout(() => {
