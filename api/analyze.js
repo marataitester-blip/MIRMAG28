@@ -136,12 +136,19 @@ async function getPsychologicalAnalysis(userRequest) {
   2. Выбрать одну наиболее подходящую карту из 80 (0-79).
   3. Дать глубокое толкование состояния.
   
+  Структура колоды (СТРОГО СОБЛЮДАЙ ID):
+  0-23: Старшие Арканы
+  24-37: Жезлы (Огонь, действия)
+  38-51: Кубки (Вода, чувства)
+  52-65: Мечи (Воздух, мысли)
+  66-79: Пентакли (Земля, ресурсы)
+
   Верни JSON:
   {
     "card_id": number (0-79),
     "card_name": "Название карты (RU)",
     "keyword": "Ключевое слово",
-    "interpretation": "Глубокое толкование (3-4 предложения)"
+    "interpretation": "Глубокое толкование (минимум 150 слов)"
   }`;
 
   return callGroq([
@@ -210,7 +217,11 @@ export default async function handler(req) {
         imageUrl: deckImageUrl
       },
       interpretation: psychData.interpretation,
-      generatedImageUrl: generatedImageUrl
+      generatedImageUrl: generatedImageUrl,
+      // Extra fields for robustness / logging / debugging
+      timestamp: new Date().toISOString(),
+      image_prompt: visualData.image_prompt,
+      imageUrl: generatedImageUrl // Alias to match common APIs
     }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
     });

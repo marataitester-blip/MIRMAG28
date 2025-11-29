@@ -9,6 +9,10 @@ export interface AnalysisResult {
   card: TarotCard;
   interpretation: string;
   generatedImageUrl: string | null;
+  // Extended fields
+  timestamp?: string;
+  image_prompt?: string;
+  imageUrl?: string;
 }
 
 export enum AnalysisStep {
