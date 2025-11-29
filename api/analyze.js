@@ -5,7 +5,7 @@ export const config = {
 
 // FULL DECK IMAGE DATABASE
 const DECK_IMAGES = [
-  // --- Major Arcana (0-23) ---
+  // --- Major Arcana (0-21) ---
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/00_fool.png",
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/01_magician.png",
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/02_high_priestess.png",
@@ -28,8 +28,9 @@ const DECK_IMAGES = [
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/19_sun.png",
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/20_judgement.png",
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/21_world.png",
-  "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/22_hero.png",
-  "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/23_white_card.png",
+  // --- Special Cards ---
+  "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/22_hero.png",       // 22 Hero
+  "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/23_white_card.png", // 23 White Card
 
   // --- Wands (24-37) ---
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/wands_01_ace.png",
@@ -108,7 +109,7 @@ async function callGroq(messages, jsonMode = true) {
       model: 'llama-3.3-70b-versatile',
       messages,
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 1024,
       response_format: jsonMode ? { type: "json_object" } : undefined
     }),
   });
@@ -130,26 +131,32 @@ async function callGroq(messages, jsonMode = true) {
 
 // TASK A: Psychologist (Selects Card & Interprets)
 async function getPsychologicalAnalysis(userRequest) {
-  const systemPrompt = `Ты — глубинный психолог и эксперт по Таро (юнгианский анализ).
+  const systemPrompt = `Ты действуешь как синтетический психолог. В твоём стиле сочетаются:
+  Карл Юнг (архетипы), Ричард Бах (метафоры полета), Стивен Волински (квантовая психология), 
+  Берт Хеллингер (родовые системы), Дейл Карнеги (эмпатия), Банцхоф (тарология), 
+  Владимир Леви (жизненная навигация) и Владимир Серкин (шаманские практики).
+
   Твоя задача:
-  1. Проанализировать запрос пользователя.
-  2. Выбрать одну наиболее подходящую карту из 80 (0-79).
-  3. Дать глубокое толкование состояния.
+  1. Проанализировать описание ситуации пользователя через призму архетипов и глубинной психологии.
+  2. Выбрать ОДНУ карту из полной колоды (80 карт).
   
   Структура колоды (СТРОГО СОБЛЮДАЙ ID):
-  0-23: Старшие Арканы
-  24-37: Жезлы (Огонь, действия)
-  38-51: Кубки (Вода, чувства)
-  52-65: Мечи (Воздух, мысли)
-  66-79: Пентакли (Земля, ресурсы)
+  - 0-21: Старшие Арканы (Судьбоносные, кармические уроки)
+  - 22: Герой (Путь эго, опыт, испытание)
+  - 23: Белая карта (Неизвестность, свобода воли, божественное вмешательство)
+  - 24-37: Жезлы (Огонь: воля, страсть, карьера)
+  - 38-51: Кубки (Вода: чувства, отношения, подсознание)
+  - 52-65: Мечи (Воздух: мысли, конфликты, решения)
+  - 66-79: Пентакли (Земля: деньги, тело, стабильность)
 
-  Верни JSON:
+  3. Верни строго валидный JSON объект:
   {
-    "card_id": number (0-79),
-    "card_name": "Название карты (RU)",
-    "keyword": "Ключевое слово",
-    "interpretation": "Глубокое толкование (минимум 150 слов)"
-  }`;
+    "card_id": <целое число от 0 до 79>,
+    "card_name": "<название карты на русском>",
+    "interpretation": "<философско-психологический анализ и совет. Стиль: мотивирующий, глубокий, вдохновляющий. Объем: 120-160 слов.>"
+  }
+  
+  Никакого лишнего текста, только JSON.`;
 
   return callGroq([
     { role: 'system', content: systemPrompt },
@@ -159,13 +166,14 @@ async function getPsychologicalAnalysis(userRequest) {
 
 // TASK B: Artist (Generates Image Prompt)
 async function getVisualPrompt(userRequest) {
-  const systemPrompt = `You are a surrealist artist creating prompts for generative AI.
+  const systemPrompt = `You are a surrealist artist creating prompts for generative AI (Pollinations).
   Create a visual description of the user's emotional state in the style of "Astral Tarot".
-  Focus on symbolism, lighting, and mood. Do NOT mention specific Tarot card names, focus on the visual essence.
+  Focus on symbolism, lighting, and mood. 
+  Do NOT mention specific Tarot card names, focus on the visual essence and feelings.
   
   Return JSON:
   {
-    "image_prompt": "A surreal painting of... (English)"
+    "image_prompt": "A surreal painting of... (English, 30-50 words)"
   }`;
 
   return callGroq([
