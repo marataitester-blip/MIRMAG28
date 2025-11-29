@@ -20,21 +20,57 @@ export default function App() {
     };
   }, []);
 
-  const handleAnalyze = async () => {
-    if (!input.trim()) return;
+ const handleAnalyze = async () => {
+  if (!input.trim()) return;
+  
+  setResult(null);
+  setErrorMessage(null);
+  setStep(AnalysisStep.PROCESSING);
+
+  // ===== ПОКАЗАТЬ ЛОАДЕР =====
+  showLoader();
+  
+  try {
+    const response = await fetch('/api/analyze', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ mode: 'groq', userRequest: input })
+    });
+
+    const data = await response.json();
+
+    // ===== СКРЫТЬ ЛОАДЕР =====
+    hideLoader();
+
+    if (!response.ok) {
+      throw new Error(data.error || `Ошибка сервера: ${response.status}`);
+    }
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (!data.generatedImageUrl || !data.interpretation) {
+      console.error("Bad response format:", data);
+      throw new Error("Сервер вернул неполные данные");
+    }
+
+    setResult(data);
+    setStep(AnalysisStep.COMPLETED);
     
-    setResult(null);
-    setErrorMessage(null);
-    setStep(AnalysisStep.PROCESSING);
+    setTimeout(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+
+  } catch (error: any) {
+    // ===== СКРЫТЬ ЛОАДЕР ПРИ ОШИБКЕ =====
+    hideLoader();
     
-    try {
-      // Parallel Request: The backend now handles both Text and Image generation 
-      // simultaneously via Promise.all for maximum speed.
-      const response = await fetch('/api/analyze', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ mode: 'groq', userRequest: input })
-      });
+    console.error("Workflow failed", error);
+    setErrorMessage(error.message || "Произошла ошибка связи с сервером");
+    setStep(AnalysisStep.ERROR);
+  }
+};
 
       const data = await response.json();
 
