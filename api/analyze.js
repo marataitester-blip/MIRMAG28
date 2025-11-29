@@ -96,11 +96,81 @@ const DECK_IMAGES = [
   "https://cdn.jsdelivr.net/gh/marataitester-blip/tarot/pentacles_14_king.png"
 ];
 
+// Helper to call Groq
+async function callGroq(messages, jsonMode = true) {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages,
+      temperature: 0.7,
+      max_tokens: 800,
+      response_format: jsonMode ? { type: "json_object" } : undefined
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Groq API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  let content = data.choices[0]?.message?.content || "{}";
+  
+  // Clean potential markdown wrappers
+  if (content.startsWith('```json')) {
+      content = content.replace(/^```json\n/, '').replace(/\n```$/, '');
+  }
+  
+  return JSON.parse(content);
+}
+
+// TASK A: Psychologist (Selects Card & Interprets)
+async function getPsychologicalAnalysis(userRequest) {
+  const systemPrompt = `Ты — глубинный психолог и эксперт по Таро (юнгианский анализ).
+  Твоя задача:
+  1. Проанализировать запрос пользователя.
+  2. Выбрать одну наиболее подходящую карту из 80 (0-79).
+  3. Дать глубокое толкование состояния.
+  
+  Верни JSON:
+  {
+    "card_id": number (0-79),
+    "card_name": "Название карты (RU)",
+    "keyword": "Ключевое слово",
+    "interpretation": "Глубокое толкование (3-4 предложения)"
+  }`;
+
+  return callGroq([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userRequest }
+  ]);
+}
+
+// TASK B: Artist (Generates Image Prompt)
+async function getVisualPrompt(userRequest) {
+  const systemPrompt = `You are a surrealist artist creating prompts for generative AI.
+  Create a visual description of the user's emotional state in the style of "Astral Tarot".
+  Focus on symbolism, lighting, and mood. Do NOT mention specific Tarot card names, focus on the visual essence.
+  
+  Return JSON:
+  {
+    "image_prompt": "A surreal painting of... (English)"
+  }`;
+
+  return callGroq([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userRequest }
+  ]);
+}
+
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      status: 405, headers: { 'Content-Type': 'application/json' }
     });
   }
 
@@ -111,99 +181,44 @@ export default async function handler(req) {
       throw new Error('Server configuration error: GROQ_API_KEY is missing');
     }
 
-    // 1. Call Groq API (Llama 3.3)
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: `Ты — глубинный психолог и эксперт по Таро (юнгианский анализ). Твоя цель — дать инсайт.
-            Верни ответ СТРОГО в формате JSON без лишнего текста.
-            
-            Выбери карту из 80 вариантов (0-23 Старшие Арканы, 24-79 Младшие).
-            
-            Структура JSON:
-            {
-              "card_id": 0-79,
-              "card_name": "Название карты (RU)",
-              "keyword": "Ключевое слово",
-              "interpretation": "Глубокое психологическое толкование состояния (RU, 3-4 предложения)",
-              "image_prompt": "Описание сюрреалистичной картины в стиле Astral Tarot, отражающей суть карты (EN)"
-            }`
-          },
-          {
-            role: 'user',
-            content: userRequest || "Общий анализ состояния"
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-        response_format: { type: "json_object" }
-      }),
-    });
+    const requestText = userRequest || "Общее состояние";
 
-    if (!groqResponse.ok) {
-      const errText = await groqResponse.text();
-      console.error('Groq API Error:', errText);
-      throw new Error(`Groq API error: ${groqResponse.status}`);
-    }
+    // --- PARALLEL EXECUTION START ---
+    // Launch both AI agents simultaneously
+    const [psychData, visualData] = await Promise.all([
+      getPsychologicalAnalysis(requestText),
+      getVisualPrompt(requestText)
+    ]);
+    // --- PARALLEL EXECUTION END ---
 
-    const groqData = await groqResponse.json();
-    let content = groqData.choices[0]?.message?.content;
-
-    if (content.startsWith('```json')) {
-      content = content.replace(/^```json\n/, '').replace(/\n```$/, '');
-    }
-
-    let parsedData;
-    try {
-      parsedData = JSON.parse(content);
-    } catch (e) {
-      console.error('JSON Parse Error:', content);
-      throw new Error('Failed to parse AI response');
-    }
-
-    // 2. Select the Static Image from the Deck
-    const cardId = parsedData.card_id;
-    let deckImageUrl = "";
-    
-    // Safety check for index bounds
+    // 1. Process Card Image (Static)
+    const cardId = psychData.card_id;
+    let deckImageUrl = DECK_IMAGES[0]; // Default
     if (typeof cardId === 'number' && cardId >= 0 && cardId < DECK_IMAGES.length) {
         deckImageUrl = DECK_IMAGES[cardId];
-    } else {
-        // Fallback to Fool if ID is invalid
-        deckImageUrl = DECK_IMAGES[0];
     }
 
-    // 3. Generate Unique Portrait URL (Pollinations)
-    const promptEncoded = encodeURIComponent(parsedData.image_prompt);
+    // 2. Process Generated Image (Dynamic)
+    // Turbo model for speed, optimal dimensions for mobile
+    const promptEncoded = encodeURIComponent(visualData.image_prompt);
     const generatedImageUrl = `https://image.pollinations.ai/prompt/${promptEncoded}?model=turbo&width=768&height=1024&nologo=true`;
 
-    // 4. Return Response
     return new Response(JSON.stringify({
       card: {
-        name: parsedData.card_name,
-        keyword: parsedData.keyword || "Архетип",
-        imageUrl: deckImageUrl // <--- USE STATIC DECK IMAGE HERE
+        name: psychData.card_name,
+        keyword: psychData.keyword || "Архетип",
+        imageUrl: deckImageUrl
       },
-      interpretation: parsedData.interpretation,
-      generatedImageUrl: generatedImageUrl // <--- USE DYNAMIC IMAGE HERE
+      interpretation: psychData.interpretation,
+      generatedImageUrl: generatedImageUrl
     }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      status: 200, headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('API Handler Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    console.error('API Error:', error);
+    return new Response(JSON.stringify({ error: error.message || 'Processing failed' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
     });
   }
 }

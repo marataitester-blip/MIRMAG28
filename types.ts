@@ -13,7 +13,7 @@ export interface AnalysisResult {
 
 export enum AnalysisStep {
   IDLE = 'IDLE',
-  PROCESSING = 'PROCESSING', // Combined analysis and generation
+  PROCESSING = 'PROCESSING', // Parallel: Interpretation + Image Prompt Generation
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR'
 }

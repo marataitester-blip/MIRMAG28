@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
 import { CardDisplay } from './components/CardDisplay';
@@ -27,30 +28,27 @@ export default function App() {
     setStep(AnalysisStep.PROCESSING);
     
     try {
-      // Safe Fetch Logic
+      // Parallel Request: The backend now handles both Text and Image generation 
+      // simultaneously via Promise.all for maximum speed.
       const response = await fetch('/api/analyze', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ mode: 'groq', userRequest: input })
       });
 
-      // Parse JSON first to extract potential server error messages
       const data = await response.json();
 
-      // 1. Check for HTTP errors
       if (!response.ok) {
         throw new Error(data.error || `Ошибка сервера: ${response.status}`);
       }
 
-      // 2. Check for explicit API errors
       if (data.error) {
         throw new Error(data.error);
       }
 
-      // 3. Validate Data Integrity (Crucial!)
       if (!data.generatedImageUrl || !data.interpretation) {
         console.error("Bad response format:", data);
-        throw new Error("Сервер вернул неполные данные (нет изображения или толкования)");
+        throw new Error("Сервер вернул неполные данные");
       }
 
       setResult(data);
@@ -84,21 +82,15 @@ export default function App() {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     } else {
-      // Cancel any ongoing speech first
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(result.interpretation);
-      
-      // Configuration
       utterance.rate = 0.9;
       utterance.pitch = 0.9;
       utterance.lang = 'ru-RU';
 
-      // Voice Selection Logic
       const voices = window.speechSynthesis.getVoices();
       const ruVoices = voices.filter(v => v.lang.includes('ru'));
-      
-      // Priority: Google -> Premium -> First available Russian
       const preferredVoice = ruVoices.find(v => v.name.toLowerCase().includes('google')) || 
                              ruVoices.find(v => v.name.toLowerCase().includes('premium')) ||
                              ruVoices[0];
@@ -107,7 +99,6 @@ export default function App() {
         utterance.voice = preferredVoice;
       }
 
-      // Event handlers
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
 
@@ -168,10 +159,10 @@ export default function App() {
                <div className="spinner-active"></div>
             </div>
             <h3 style={{fontFamily: 'Cinzel, serif', color: 'var(--accent-gold)', fontSize: '1.25rem'}}>
-              Обращение к коллективному бессознательному...
+              Синхронизация потоков...
             </h3>
             <p style={{color: 'var(--text-muted)'}}>
-                Анализ архетипов и формирование образа (Groq Llama-3)
+                Параллельная генерация текста и образа (Groq Turbo)
             </p>
           </div>
         )}
@@ -182,12 +173,6 @@ export default function App() {
             
             {/* Cards Grid */}
             <div className="results-grid">
-                {/* 
-                   Safe Render: Only render if we have data.
-                   The backend now returns the 'generatedImageUrl' inside the 'card' object too 
-                   to simplify mapping, but we kept the dual display structure.
-                */}
-                
                 {result.card && (
                     <CardDisplay 
                         imageSrc={result.card.imageUrl}
