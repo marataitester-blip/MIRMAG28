@@ -1,15 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AnalysisResult, AnalysisStep } from './types';
 import { CardDisplay } from './components/CardDisplay';
-import { Sparkles, RefreshCcw, ShieldCheck } from 'lucide-react';
+import { Sparkles, RefreshCcw, ShieldCheck, Volume2, Square } from 'lucide-react';
 
 export default function App() {
   const [input, setInput] = useState('');
   const [step, setStep] = useState<AnalysisStep>(AnalysisStep.IDLE);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // Stop speech if component unmounts or resets
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleAnalyze = async () => {
     if (!input.trim()) return;
@@ -60,11 +68,52 @@ export default function App() {
   };
 
   const reset = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
     setInput('');
     setResult(null);
     setErrorMessage(null);
     setStep(AnalysisStep.IDLE);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleSpeech = () => {
+    if (!result?.interpretation) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      // Cancel any ongoing speech first
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(result.interpretation);
+      
+      // Configuration
+      utterance.rate = 0.9;
+      utterance.pitch = 0.9;
+      utterance.lang = 'ru-RU';
+
+      // Voice Selection Logic
+      const voices = window.speechSynthesis.getVoices();
+      const ruVoices = voices.filter(v => v.lang.includes('ru'));
+      
+      // Priority: Google -> Premium -> First available Russian
+      const preferredVoice = ruVoices.find(v => v.name.toLowerCase().includes('google')) || 
+                             ruVoices.find(v => v.name.toLowerCase().includes('premium')) ||
+                             ruVoices[0];
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+
+      // Event handlers
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
   };
 
   return (
@@ -175,6 +224,18 @@ export default function App() {
                  
                  <div className="interpretation-text">
                     {result.interpretation}
+                 </div>
+
+                 {/* TTS Button */}
+                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
+                    <button 
+                        onClick={toggleSpeech} 
+                        className="btn-primary" 
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                    >
+                        {isSpeaking ? <Square size={18} fill="currentColor" /> : <Volume2 size={18} />}
+                        <span>{isSpeaking ? "Остановить" : "Прослушать"}</span>
+                    </button>
                  </div>
             </div>
 

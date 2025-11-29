@@ -1,6 +1,6 @@
 {
   "name": "Astral Hero",
-  "short_name": "TarotPortrait",
+  "short_name": "AstralHero",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f14",
